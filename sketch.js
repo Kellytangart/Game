@@ -4,15 +4,27 @@ let state = 'title';
 let cnv;
 let points = 0;
 let w = 600;
-let h = 600
+let h = 600;
+let player;
+let coin = [];
+let playerImg;
+let coinImg;
+
+function preload(){
+  playerImg= loadImage();
+  coinImg= loadImage();
+}
 
 function setup() {
   cnv = createCanvas(w, h);
   textFont('monospace');
-
+  player = new Player();
+  //coin[] = new Coin();
+  coin.push(new Coin());
 }
 
 function draw() {
+
 
   switch (state) {
     case 'title':
@@ -39,6 +51,20 @@ function draw() {
 // cnv.mouseClicked(level1MouseClicked);
 //  }else {
 
+function keyPressed() {
+  if (keyCode == LEFT_ARROW) {
+    player.direction = 'left';
+  } else if (keyCode == RIGHT_ARROW) {
+    player.direction = 'right';
+  } else if (keyCode == UP_ARROW) {
+    player.direction = 'up';
+  } else if (keyCode == DOWN_ARROW) {
+    player.direction = 'down';
+  } else if (key == ' ') {
+    player.direction = 'still';
+  }
+}
+
 
 function title() {
   background(100);
@@ -58,8 +84,29 @@ function titleMouseClicked() {
 
 function level1() {
   background(50, 150, 200);
-  text('click for points', w / 2, h - 30);
 
+  if (random(1) <= 0.01) {
+    coin.push(new Coin());
+  }
+  player.display();
+  player.move();
+
+  for (let i = 0; i < coin.length; i++) {
+    coin[i].display();
+    coin[i].move();
+  }
+
+  //check for collision, if there is a collision increase points by 1
+  for (let i = coin.length - 1; i >= 0; i--) {
+    if (dist(player.x, player.y, coin[i].x, coin[i].y) <= (player.r + coin[i].r) / 2) {
+      points++;
+      coin.splice(i,1);
+    }else if (coin[i].y > h) {
+      coin.splice(i,1);
+      console.log('coin is out of town');
+    }
+  }
+  text(`points: ${points}`, w / 4, h - 30);
 }
 
 function level1MouseClicked() {
